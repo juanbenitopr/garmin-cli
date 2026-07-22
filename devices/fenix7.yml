@@ -1,0 +1,11 @@
+id: fenix7
+garminProductId: fenix7
+family: fenix7
+display:
+  width: 260
+  height: 260
+  technology: mip
+capabilities:
+  weather: true
+  touch: false
+

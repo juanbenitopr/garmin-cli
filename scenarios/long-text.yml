@@ -1,0 +1,16 @@
+name: long-text
+time: "2026-12-31T23:59:59+01:00"
+system:
+  battery: 43
+  notifications: 99
+activity:
+  steps: 123456
+  heartRate: 199
+weather:
+  temperatureCelsius: -18
+  condition: thunderstorms
+settings:
+  theme: high-contrast
+  showSeconds: true
+budgets: {}
+

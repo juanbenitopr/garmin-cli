@@ -1,0 +1,57 @@
+{
+  "name": "ciq-forge",
+  "version": "0.1.0",
+  "description": "CLI-first automation and scaffolding for Garmin Connect IQ projects",
+  "type": "module",
+  "bin": {
+    "ciq-forge": "dist/packages/cli/src/index.js"
+  },
+  "files": [
+    "dist",
+    "barrels",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "garmin",
+    "connect-iq",
+    "monkey-c",
+    "watchface",
+    "cli"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "ciq-forge": "tsx packages/cli/src/index.ts",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test && npm run typecheck"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "fast-xml-parser": "^5.2.0",
+    "pngjs": "^7.0.0",
+    "yaml": "^2.8.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@ciq-forge/core": "workspace:*",
+    "@ciq-forge/garmin-compiler": "workspace:*",
+    "@ciq-forge/garmin-simulator": "workspace:*",
+    "@types/node": "^24.0.0",
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

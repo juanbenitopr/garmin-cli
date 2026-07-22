@@ -1,0 +1,17 @@
+name: sleep
+time: "2026-07-21T03:15:00+02:00"
+system:
+  battery: 61
+  notifications: 1
+activity:
+  steps: 0
+  heartRate: 51
+weather:
+  temperatureCelsius: 19
+  condition: clear
+settings:
+  theme: dark
+  showSeconds: false
+  mode: low-power
+budgets: {}
+

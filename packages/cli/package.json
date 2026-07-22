@@ -1,0 +1,14 @@
+{
+  "name": "@ciq-forge/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ciq-forge": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ciq-forge/core": "workspace:*",
+    "@ciq-forge/garmin-compiler": "workspace:*",
+    "commander": "^14.0.0"
+  }
+}

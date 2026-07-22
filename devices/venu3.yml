@@ -1,0 +1,11 @@
+id: venu3
+garminProductId: venu3
+family: venu3
+display:
+  width: 454
+  height: 454
+  technology: amoled
+capabilities:
+  weather: true
+  touch: true
+

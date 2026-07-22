@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08111f" />
+    <meta name="description" content="CIQ Forge scaffolds, validates, builds, profiles, and visually tests Garmin Connect IQ projects from one deterministic CLI." />
+    <title>CIQ Forge — Garmin Connect IQ automation</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="CIQ Forge home">
+        <span class="brand-mark" aria-hidden="true">CF</span>
+        <span>CIQ Forge</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#start">Get started</a>
+        <a class="nav-cta" href="https://www.npmjs.com/package/ciq-forge">npm</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Garmin Connect IQ, forged into a workflow</p>
+          <h1>Build watch faces with a test loop you can trust.</h1>
+          <p class="hero-lede">
+            Scaffold, validate, compile, profile, and visually test Connect IQ projects against real Garmin tools—without stitching together one-off scripts.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#start">Create a project</a>
+            <a class="button secondary" href="https://www.npmjs.com/package/ciq-forge">View on npm <span aria-hidden="true">↗</span></a>
+          </div>
+          <ul class="hero-facts" aria-label="Project highlights">
+            <li><strong>Node 20+</strong><span>One install</span></li>
+            <li><strong>Real SDK</strong><span>No emulator layer</span></li>
+            <li><strong>CI-ready</strong><span>JSON + JUnit reports</span></li>
+          </ul>
+        </div>
+
+        <div class="terminal-wrap" aria-label="CIQ Forge command example">
+          <div class="terminal-glow"></div>
+          <div class="terminal">
+            <div class="terminal-bar">
+              <div class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span>powershell — ciq-forge</span>
+              <button class="copy-button" type="button" data-copy="npx ciq-forge new solar-face --type watchface --devices fenix7,venu3 --yes" aria-label="Copy command">Copy</button>
+            </div>
+            <pre><code><span class="prompt">PS›</span> npx ciq-forge new solar-face `
+    --type watchface `
+    --devices fenix7,venu3 `
+    --yes
+
+<span class="success">✓</span> Project created
+  <span class="dim">type</span>       watchface
+  <span class="dim">devices</span>    fenix7, venu3
+  <span class="dim">scenario</span>   normal
+  <span class="dim">barrel</span>     vendored
+
+<span class="prompt">PS›</span> cd solar-face
+<span class="prompt">PS›</span> ciq-forge inspect
+<span class="success">✓</span> 2 devices × 1 scenario = 2 jobs</code></pre>
+          </div>
+          <div class="matrix-card matrix-one"><span>Venu 3</span><strong>454 × 454</strong><small>AMOLED</small></div>
+          <div class="matrix-card matrix-two"><span>fēnix 7</span><strong>260 × 260</strong><small>MIP</small></div>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="CIQ Forge capabilities">
+        <span>Scaffolding</span><i></i><span>Deterministic fixtures</span><i></i><span>Visual baselines</span><i></i><span>Profiling budgets</span><i></i><span>Official Garmin SDK</span>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-heading">
+          <p class="eyebrow"><span></span> One CLI, the whole loop</p>
+          <h2>From empty folder to evidence.</h2>
+          <p>CIQ Forge makes the repetitive parts explicit, inspectable, and repeatable—locally and in CI.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature feature-large">
+            <span class="feature-number">01</span>
+            <div>
+              <h3>Start from a project that already works</h3>
+              <p>The mini assistant creates a watch face or device app with its manifest, Jungle file, resources, selected device definitions, starter scenario, and a vendored CIQ Forge barrel.</p>
+            </div>
+            <div class="tree" aria-label="Generated project structure">
+              <p><b>solar-face/</b></p>
+              <p>├── <span>source/</span></p>
+              <p>├── <span>resources/</span></p>
+              <p>├── <span>devices/</span></p>
+              <p>├── <span>scenarios/</span></p>
+              <p>├── <span>vendor/ciq-forge/</span></p>
+              <p>├── manifest.xml</p>
+              <p>├── monkey.jungle</p>
+              <p>└── forge.yml</p>
+            </div>
+          </article>
+
+          <article class="feature">
+            <span class="feature-number">02</span>
+            <h3>Run a deterministic matrix</h3>
+            <p>Combine device profiles and scenarios into stable, isolated jobs. Filter down to one target while iterating.</p>
+            <div class="mini-matrix" aria-hidden="true">
+              <span></span><b>Normal</b><b>Sleep</b><b>Low battery</b>
+              <strong>Venu 3</strong><i class="pass">✓</i><i class="pass">✓</i><i class="pass">✓</i>
+              <strong>fēnix 7</strong><i class="pass">✓</i><i class="pass">✓</i><i class="warn">!</i>
+              <strong>FR 965</strong><i class="pass">✓</i><i class="pass">✓</i><i class="pass">✓</i>
+            </div>
+          </article>
+
+          <article class="feature">
+            <span class="feature-number">03</span>
+            <h3>Catch regressions you can see</h3>
+            <p>Capture simulator output, normalize it per device, compare against approved baselines, and highlight changed pixels.</p>
+            <div class="diff-demo" aria-hidden="true">
+              <div><span>09:42</span><small>baseline</small></div>
+              <b>→</b>
+              <div class="changed"><span>09:43</span><small>current</small></div>
+            </div>
+          </article>
+
+          <article class="feature feature-wide">
+            <span class="feature-number">04</span>
+            <div>
+              <h3>Turn performance into a contract</h3>
+              <p>Track binary size, memory peaks, render duration, and a relative energy score. Scenario budgets turn regressions into actionable CI failures.</p>
+            </div>
+            <div class="metric-row" aria-label="Example profile metrics">
+              <div><small>Binary</small><strong>82.4 KB</strong><span class="good">Within budget</span></div>
+              <div><small>Memory peak</small><strong>71%</strong><span class="good">−4% from baseline</span></div>
+              <div><small>Render avg.</small><strong>7.2 ms</strong><span class="good">Below 10 ms</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow-section" id="workflow">
+        <div class="section workflow-inner">
+          <div class="section-heading compact">
+            <p class="eyebrow"><span></span> Designed for the real toolchain</p>
+            <h2>CIQ Forge orchestrates.<br />Garmin still executes.</h2>
+          </div>
+          <ol class="workflow-list">
+            <li><span>01</span><div><h3>Inspect</h3><p>Validate configuration, manifest, devices, and scenarios before expensive work begins.</p></div><code>ciq-forge inspect</code></li>
+            <li><span>02</span><div><h3>Build</h3><p>Discover the local SDK and compile one isolated PRG for every selected device.</p></div><code>ciq-forge build</code></li>
+            <li><span>03</span><div><h3>Exercise</h3><p>Inject deterministic fixture data and run the app through the official simulator.</p></div><code>ciq-forge run</code></li>
+            <li><span>04</span><div><h3>Report</h3><p>Keep JSON, JUnit, HTML, logs, metrics, screenshots, and pixel diffs as evidence.</p></div><code>results/</code></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section start-section" id="start">
+        <div class="start-copy">
+          <p class="eyebrow"><span></span> Ready when your SDK is</p>
+          <h2>Create your first project.</h2>
+          <p>Run it once with npx, or install it globally. The Garmin Connect IQ SDK and developer key stay on your machine.</p>
+        </div>
+        <div class="install-panel">
+          <div class="install-tabs" role="tablist" aria-label="Installation method">
+            <button class="active" type="button" role="tab" aria-selected="true" data-command="npx ciq-forge new my-watchface">npx</button>
+            <button type="button" role="tab" aria-selected="false" data-command="npm install --global ciq-forge">npm</button>
+          </div>
+          <div class="install-command">
+            <code id="install-command">npx ciq-forge new my-watchface</code>
+            <button class="copy-button large" type="button" data-copy-target="install-command">Copy</button>
+          </div>
+          <p>Then verify your local setup with <code>ciq-forge doctor</code>.</p>
+        </div>
+      </section>
+
+      <section class="final-cta">
+        <p>Less glue code. More confidence on every screen.</p>
+        <a class="button primary" href="https://www.npmjs.com/package/ciq-forge">Explore CIQ Forge on npm <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">CF</span><span>CIQ Forge</span></a>
+      <p>Open tooling for deterministic Garmin Connect IQ development.</p>
+      <p>© <span id="year"></span> CIQ Forge</p>
+    </footer>
+  </body>
+</html>

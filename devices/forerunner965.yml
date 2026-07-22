@@ -1,0 +1,11 @@
+id: forerunner965
+garminProductId: fr965
+family: forerunner965
+display:
+  width: 454
+  height: 454
+  technology: amoled
+capabilities:
+  weather: true
+  touch: true
+

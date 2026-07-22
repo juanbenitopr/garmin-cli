@@ -1,0 +1,21 @@
+name: normal
+time: "2026-07-21T09:42:30+02:00"
+system:
+  battery: 82
+  notifications: 0
+activity:
+  steps: 8432
+  stepGoal: 10000
+  bodyBattery: 67
+  recoveryHours: 12
+  intensityMinutes: 86
+  weeklyDistanceMeters: 28400
+  heartRate: 72
+weather:
+  temperatureCelsius: 24
+  condition: sunny
+settings:
+  theme: dark
+  showSeconds: true
+budgets:
+  compileWarnings: 0

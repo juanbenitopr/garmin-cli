@@ -1,0 +1,21 @@
+name: low-battery
+time: "2026-07-21T18:05:00+02:00"
+system:
+  battery: 18
+  notifications: 3
+activity:
+  steps: 12540
+  stepGoal: 10000
+  bodyBattery: 24
+  recoveryHours: 36
+  intensityMinutes: 134
+  weeklyDistanceMeters: 42100
+  heartRate: 68
+weather:
+  temperatureCelsius: 31
+  condition: sunny
+settings:
+  theme: beige
+  showSeconds: true
+budgets:
+  compileWarnings: 0

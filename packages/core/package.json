@@ -1,0 +1,13 @@
+{
+  "name": "@ciq-forge/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "fast-xml-parser": "^5.2.0",
+    "pngjs": "^7.0.0",
+    "yaml": "^2.8.0",
+    "zod": "^4.0.0"
+  }
+}

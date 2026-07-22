@@ -1,0 +1,12 @@
+name: empty-data
+time: "2026-07-21T00:00:00+02:00"
+system:
+  battery: 100
+  notifications: 0
+activity: {}
+weather: {}
+settings:
+  theme: dark
+  showSeconds: false
+budgets: {}
+

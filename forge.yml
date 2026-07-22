@@ -1,0 +1,31 @@
+project:
+  root: examples/basic-watchface
+  jungle: monkey.jungle
+  manifest: manifest.xml
+
+inputs:
+  devicesDir: devices
+  scenariosDir: scenarios
+
+execution:
+  workers: 4
+  timeoutMs: 30000
+  output: .ciq-forge/results
+
+compiler:
+  maxConcurrency: 1
+
+simulator:
+  startupTimeoutMs: 15000
+  captureDelayMs: 2000
+  windowTitle: Connect IQ Device Simulator
+  window:
+    x: 0
+    y: 0
+    width: 1200
+    height: 1000
+
+visual:
+  baselinesDir: baselines
+  differenceThreshold: 0.001
+  pixelThreshold: 16
