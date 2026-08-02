@@ -30,7 +30,19 @@ describe("Connect IQ project scaffolding", () => {
     expect(project.products).toEqual(["fenix7", "venu3"]);
     expect(devices.map((device) => device.id)).toEqual(["fenix7", "venu3"]);
     expect(scenarios.map((scenario) => scenario.name)).toEqual(["normal"]);
-    expect(await readFile(path.join(directory, "vendor", "ciq-forge", "CiqForge.mc"), "utf8")).toContain("module CiqForge");
+    const app = await readFile(path.join(directory, "source", "SolarFaceApp.mc"), "utf8");
+    const view = await readFile(path.join(directory, "source", "SolarFaceView.mc"), "utf8");
+    const bootstrap = await readFile(path.join(directory, "source", "ForgeBootstrap.mc"), "utf8");
+    const barrel = await readFile(path.join(directory, "vendor", "ciq-forge", "CiqForge.mc"), "utf8");
+    expect(app).toContain("extends CiqForge.AppBase");
+    expect(app).toContain("return ForgeBootstrap.context()");
+    expect(app).toContain("createInitialView(forgeContext)");
+    expect(view).toContain("extends CiqForge.WatchFace");
+    expect(view).toContain("function onForgeUpdate(dc)");
+    expect(view).not.toContain("function onUpdate(dc)");
+    expect(bootstrap).toContain("private var _context = null");
+    expect(barrel).toContain("module CiqForge");
+    expect(barrel).toContain("class WatchFace extends Ui.WatchFace");
   });
 
   it("creates a device app with a valid Monkey C class name", async () => {
@@ -48,7 +60,8 @@ describe("Connect IQ project scaffolding", () => {
 
     expect(result.className).toBe("App123StepsMore");
     expect(manifest).toContain('type="watch-app"');
-    expect(view).toContain("extends WatchUi.View");
+    expect(view).toContain("extends CiqForge.View");
+    expect(view).toContain("function onForgeUpdate(dc)");
     expect(view).toContain('var text = "123 Steps & More";');
     expect(classNameFrom("---")).toBe("ConnectIq");
   });

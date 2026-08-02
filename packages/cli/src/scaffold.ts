@@ -122,68 +122,27 @@ ${products}
 }
 
 function appSource(className: string): string {
-  return `using Toybox.Application;
-using Toybox.WatchUi;
-
-class ${className}App extends Application.AppBase {
-    private var _forge;
-
-    function initialize() {
-        AppBase.initialize();
-        _forge = ForgeBootstrap.context();
-        _forge.diagnostics.record("app.initialize", "ok");
+  return `class ${className}App extends CiqForge.AppBase {
+    function createForgeContext() {
+        return ForgeBootstrap.context();
     }
 
-    function onStart(state) {
-        _forge.diagnostics.record("app.start", "ok");
-    }
-
-    function getInitialView() {
-        _forge.diagnostics.record("view.created", "ok");
-        return [new ${className}View(_forge)];
+    function createInitialView(forgeContext) {
+        return [new ${className}View(forgeContext)];
     }
 }
 `;
 }
 
 function viewSource(options: ScaffoldOptions, className: string): string {
-  const baseClass = options.type === "watchface" ? "WatchUi.WatchFace" : "WatchUi.View";
-  const initializer = options.type === "watchface" ? "WatchFace.initialize();" : "View.initialize();";
+  const baseClass = options.type === "watchface" ? "CiqForge.WatchFace" : "CiqForge.View";
   const textExpression = options.type === "watchface"
-    ? `var clock = _forge.clock.getClockTime();\n        var text = clock.hour.format("%02d") + ":" + clock.min.format("%02d");`
+    ? `var clock = forge().clock.getClockTime();\n        var text = clock.hour.format("%02d") + ":" + clock.min.format("%02d");`
     : `var text = ${JSON.stringify(options.name)};`;
-  const sleepHandlers = options.type === "watchface"
-    ? `
-    function onEnterSleep() {
-        _forge.diagnostics.record("sleep.enter", "ok");
-    }
-
-    function onExitSleep() {
-        _forge.diagnostics.record("sleep.exit", "ok");
-    }
-`
-    : "";
   return `using Toybox.Graphics;
-using Toybox.WatchUi;
 
 class ${className}View extends ${baseClass} {
-    private var _forge;
-
-    function initialize(forgeContext) {
-        ${initializer}
-        _forge = forgeContext;
-    }
-
-    function onLayout(dc) {
-        _forge.diagnostics.record("view.layout", dc.getWidth() + "x" + dc.getHeight());
-    }
-
-    function onShow() {
-        _forge.diagnostics.record("view.show", "ok");
-    }
-
-    function onUpdate(dc) {
-        _forge.diagnostics.beginRender();
+    function onForgeUpdate(dc) {
         ${textExpression}
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
@@ -194,11 +153,9 @@ class ${className}View extends ${baseClass} {
             text,
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
         );
-        _forge.diagnostics.record("view.update", text);
-        _forge.diagnostics.endRender();
-        _forge.diagnostics.assertResult("rendered", dc.getWidth() > 0 && dc.getHeight() > 0, "display-size");
+        forge().diagnostics.assertResult("rendered", dc.getWidth() > 0 && dc.getHeight() > 0, "display-size");
     }
-${sleepHandlers}}
+}
 `;
 }
 
@@ -245,7 +202,7 @@ export async function createScaffold(options: ScaffoldOptions): Promise<Scaffold
     ["forge.yml", `project:\n  root: .\n  jungle: monkey.jungle\n  manifest: manifest.xml\n\ninputs:\n  devicesDir: devices\n  scenariosDir: scenarios\n\nexecution:\n  workers: 4\n  timeoutMs: 30000\n  output: .ciq-forge/results\n\ncompiler:\n  maxConcurrency: 1\n\nsimulator:\n  startupTimeoutMs: 15000\n  captureDelayMs: 2000\n  windowTitle: Connect IQ Device Simulator\n  window:\n    x: 0\n    y: 0\n    width: 1200\n    height: 1000\n\nvisual:\n  baselinesDir: baselines\n  differenceThreshold: 0.001\n  pixelThreshold: 16\n`],
     [path.join("source", `${className}App.mc`), appSource(className)],
     [path.join("source", `${className}View.mc`), viewSource(normalized, className)],
-    [path.join("source", "ForgeBootstrap.mc"), `(:forgeProduction)\nmodule ForgeBootstrap {\n    function context() {\n        return CiqForge.productionContext();\n    }\n}\n`],
+    [path.join("source", "ForgeBootstrap.mc"), `(:forgeProduction)\nmodule ForgeBootstrap {\n    private var _context = null;\n\n    function context() {\n        if (_context == null) {\n            _context = CiqForge.productionContext();\n        }\n        return _context;\n    }\n}\n`],
     [path.join("resources", "strings", "strings.xml"), `<strings>\n    <string id="AppName">${xml(normalized.name)}</string>\n</strings>\n`],
     [path.join("resources", "drawables", "drawables.xml"), `<drawables>\n    <bitmap id="LauncherIcon" filename="launcher_icon.svg" />\n</drawables>\n`],
     [path.join("resources", "drawables", "launcher_icon.svg"), `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">\n  <rect width="40" height="40" rx="8" fill="#111827" />\n  <path d="M12 12h16v5H17v6h11v5H12z" fill="#38bdf8" />\n</svg>\n`],

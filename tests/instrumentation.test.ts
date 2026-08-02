@@ -32,6 +32,9 @@ describe("scenario instrumentation", () => {
     expect(first).toContain("new CiqForge.FixtureActivity");
     expect(first).toContain("new CiqForge.FixtureDisplayMode(true)");
     expect(first).toContain('new CiqForge.Diagnostics("venu3__training", true)');
+    expect(first).toContain("private var _context = null");
+    expect(first).toContain("if (_context == null)");
+    expect(first).toContain("return _context");
   });
 
   it("writes an overlay Jungle that excludes production bootstrap", async () => {

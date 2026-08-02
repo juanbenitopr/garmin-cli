@@ -152,6 +152,31 @@ ciq-forge run --device venu3 --scenario normal --screenshot
 
 Build outputs and reports are written below `.ciq-forge/results/` by default.
 
+### Lifecycle and fixture injection
+
+Generated projects extend the CIQ Forge lifecycle classes instead of adding diagnostics inside Garmin callbacks:
+
+```monkeyc
+class SolarFaceApp extends CiqForge.AppBase {
+    function createForgeContext() {
+        return ForgeBootstrap.context();
+    }
+
+    function createInitialView(forgeContext) {
+        return [new SolarFaceView(forgeContext)];
+    }
+}
+
+class SolarFaceView extends CiqForge.WatchFace {
+    function onForgeUpdate(dc) {
+        var battery = forge().systemService.getBattery();
+        // Render the view using real services or scenario fixtures.
+    }
+}
+```
+
+`CiqForge.AppBase`, `CiqForge.View`, and `CiqForge.WatchFace` own the real lifecycle methods. Their `onForge...` hooks keep application code free of profiling calls. `ForgeBootstrap.context()` is cached once per run: production builds inject real services, while scenario builds replace the production bootstrap with deterministic fixtures.
+
 ### Profile budgets
 
 Scenarios can turn performance regressions into CI failures:

@@ -2,6 +2,7 @@ using Toybox.ActivityMonitor as Activity;
 using Toybox.Application as App;
 using Toybox.System as Sys;
 using Toybox.Time as Time;
+using Toybox.WatchUi as Ui;
 
 module CiqForge {
     const Version = "0.2.0";
@@ -153,6 +154,132 @@ module CiqForge {
         function isLowPower() { return _lowPower; }
     }
 
+    class AppBase extends App.AppBase {
+        protected var _forge;
+
+        function initialize() {
+            App.AppBase.initialize();
+            _forge = createForgeContext();
+            _forge.diagnostics.record("app.initialize", "ok");
+            onForgeInitialize();
+        }
+
+        function onStart(state) {
+            _forge.diagnostics.record("app.start", "ok");
+            onForgeStart(state);
+        }
+
+        function onStop(state) {
+            onForgeStop(state);
+            _forge.diagnostics.record("app.stop", "ok");
+        }
+
+        function getInitialView() {
+            var views = createInitialView(_forge);
+            _forge.diagnostics.record("view.created", "ok");
+            return views;
+        }
+
+        function forge() { return _forge; }
+        function onForgeInitialize() {}
+        function onForgeStart(state) {}
+        function onForgeStop(state) {}
+        function createForgeContext() { return productionContext(); }
+        function createInitialView(forgeContext) { return []; }
+    }
+
+    class View extends Ui.View {
+        protected var _forge;
+
+        function initialize(forgeContext) {
+            Ui.View.initialize();
+            _forge = forgeContext;
+        }
+
+        function onLayout(dc) {
+            _forge.diagnostics.record("view.layout", dc.getWidth() + "x" + dc.getHeight());
+            onForgeLayout(dc);
+        }
+
+        function onShow() {
+            _forge.diagnostics.record("view.show", "ok");
+            onForgeShow();
+        }
+
+        function onHide() {
+            onForgeHide();
+            _forge.diagnostics.record("view.hide", "ok");
+        }
+
+        function onUpdate(dc) {
+            _forge.diagnostics.beginRender();
+            try {
+                onForgeUpdate(dc);
+                _forge.diagnostics.record("view.update", "ok");
+            } finally {
+                _forge.diagnostics.endRender();
+            }
+        }
+
+        function forge() { return _forge; }
+        function onForgeLayout(dc) {}
+        function onForgeShow() {}
+        function onForgeHide() {}
+        function onForgeUpdate(dc) {}
+    }
+
+    class WatchFace extends Ui.WatchFace {
+        protected var _forge;
+
+        function initialize(forgeContext) {
+            Ui.WatchFace.initialize();
+            _forge = forgeContext;
+        }
+
+        function onLayout(dc) {
+            _forge.diagnostics.record("view.layout", dc.getWidth() + "x" + dc.getHeight());
+            onForgeLayout(dc);
+        }
+
+        function onShow() {
+            _forge.diagnostics.record("view.show", "ok");
+            onForgeShow();
+        }
+
+        function onHide() {
+            onForgeHide();
+            _forge.diagnostics.record("view.hide", "ok");
+        }
+
+        function onUpdate(dc) {
+            _forge.diagnostics.beginRender();
+            try {
+                onForgeUpdate(dc);
+                _forge.diagnostics.record("view.update", "ok");
+            } finally {
+                _forge.diagnostics.endRender();
+            }
+        }
+
+        function onEnterSleep() {
+            _forge.diagnostics.record("sleep.enter", "ok");
+            onForgeEnterSleep();
+        }
+
+        function onExitSleep() {
+            _forge.diagnostics.record("sleep.exit", "ok");
+            onForgeExitSleep();
+        }
+
+        function forge() { return _forge; }
+        function onForgeLayout(dc) {}
+        function onForgeShow() {}
+        function onForgeHide() {}
+        function onForgeUpdate(dc) {}
+        function onForgeEnterSleep() {}
+        function onForgeExitSleep() {}
+    }
+
     class Diagnostics {
         private var _runId;
         private var _renderStartedAt;
@@ -190,7 +317,7 @@ module CiqForge {
 
         function beginRender() {
             if (_profilingEnabled) {
-                emit("render.start", "ok");
+                record("render.start", "ok");
                 _renderStartedAt = Sys.getTimer();
             }
         }
