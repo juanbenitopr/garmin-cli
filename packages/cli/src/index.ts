@@ -16,6 +16,7 @@ import {
 import {
   discoverMonkeyc,
   GarminCompilerAdapter,
+  packageIqParallel,
   type CompileResult
 } from "../../garmin-compiler/src/index.js";
 import { captureSimulatorWindow, discoverSimulatorTools } from "../../garmin-simulator/src/index.js";
@@ -186,28 +187,89 @@ program
   });
 
 program
+  .command("package")
+  .description("Build and export an optimized Connect IQ (.iq) package for Garmin Store in parallel")
+  .option("-c, --config <path>", "Forge configuration", "forge.yml")
+  .option("-o, --output <path>", "Output .iq file path")
+  .option("-v, --app-version <semver>", "Override application version in manifest")
+  .option("-j, --concurrency <number>", "Number of parallel compiler workers", (v) => parseInt(v, 10))
+  .option("--developer-key <path>", "Developer key (or set CIQ_DEVELOPER_KEY)")
+  .action(async (options: {
+    config?: string;
+    output?: string;
+    appVersion?: string;
+    concurrency?: number;
+    developerKey?: string;
+  }) => {
+    const configPath = options.config ?? "forge.yml";
+    const workspace = await loadWorkspace(configPath);
+    const compilerPath = await discoverMonkeyc(workspace.config.compiler.path);
+    const developerKey = resolveDeveloperKey(workspace.config.project.developerKey, options.developerKey);
+    if (!compilerPath) throw new Error("monkeyc was not found. Run doctor.");
+    if (!developerKey) throw new Error("A developer key is required.");
+
+    const appName = path.basename(path.resolve(workspace.config.project.root));
+    const outputIqPath = options.output
+      ? path.resolve(options.output)
+      : path.resolve(workspace.config.execution.output, "dist", `${appName}.iq`);
+    const deviceIds = workspace.devices.map((d) => d.garminProductId);
+
+    process.stdout.write(`\nPackaging ${appName} for ${deviceIds.length} devices in parallel...\n`);
+    const result = await packageIqParallel({
+      appName,
+      junglePath: workspace.config.project.jungle,
+      manifestPath: workspace.config.project.manifest,
+      developerKey,
+      devices: deviceIds,
+      outputIqPath,
+      compilerPath,
+      concurrency: options.concurrency,
+      appVersion: options.appVersion,
+      onProgress: (ev) => {
+        if (ev.status === "passed") {
+          process.stdout.write(`  [${ev.index}/${ev.total}] ${ev.deviceId}: compiled\n`);
+        } else if (ev.status === "failed") {
+          process.stdout.write(`  [${ev.index}/${ev.total}] ${ev.deviceId}: FAILED\n`);
+        }
+      }
+    });
+
+    json(result);
+    if (result.status === "failed") process.exitCode = 1;
+  });
+
+program
   .command("run")
   .description("Build and run an instrumented device/scenario matrix")
   .option("-c, --config <path>", "Forge configuration", "forge.yml")
   .option("-d, --device <id>", "Only run one Forge device id")
   .option("-s, --scenario <name>", "Only run one scenario")
   .option("--screenshot", "Capture and compare simulator screenshots")
+  .option("--parallel", "Run test matrix across parallel simulator pool")
+  .option("--headless", "Run simulator instances off-screen without opening windows")
+  .option("-j, --concurrency <number>", "Number of concurrent simulator instances", (v) => parseInt(v, 10))
   .option("--developer-key <path>", "Developer key (or set CIQ_DEVELOPER_KEY)")
-  .action(async ({ config: configPath, device, scenario, screenshot, developerKey: developerKeyOption }) => {
+  .action(async ({ config: configPath, device, scenario, screenshot, parallel, headless, concurrency, developerKey: developerKeyOption }) => {
     const workspace = await loadWorkspace(configPath);
     const compilerPath = await discoverMonkeyc(workspace.config.compiler.path);
     const developerKey = resolveDeveloperKey(workspace.config.project.developerKey, developerKeyOption);
     if (!compilerPath) throw new Error("monkeyc was not found. Run doctor.");
     if (!developerKey) throw new Error("A developer key is required.");
+    const deviceFilter = device ? device.split(",").map((s: string) => s.trim()) : undefined;
+    const scenarioFilter = scenario ? scenario.split(",").map((s: string) => s.trim()) : undefined;
     const jobs = createMatrix(workspace.devices, workspace.scenarios).filter((job) =>
-      (!device || job.device.id === device) && (!scenario || job.scenario.name === scenario));
+      (!deviceFilter || deviceFilter.includes(job.device.id)) &&
+      (!scenarioFilter || scenarioFilter.includes(job.scenario.name)));
     if (!jobs.length) throw new Error("No matrix jobs matched the requested device and scenario.");
     const results = await executeRunMatrix({
       config: workspace.config,
       jobs,
       compilerPath,
       developerKey,
-      screenshot: Boolean(screenshot)
+      screenshot: Boolean(screenshot),
+      parallel: Boolean(parallel),
+      headless: Boolean(headless),
+      concurrency
     });
     json(results);
     if (results.some((result) => result.status === "failed")) process.exitCode = 1;
@@ -217,24 +279,33 @@ program
   .command("profile")
   .description("Collect memory, render-time and relative energy metrics")
   .option("-c, --config <path>", "Forge configuration", "forge.yml")
-  .option("-d, --device <id>", "Only profile one Forge device id")
-  .option("-s, --scenario <name>", "Only profile one scenario")
+  .option("-d, --device <id>", "Only profile one Forge device id (or comma-separated ids)")
+  .option("-s, --scenario <name>", "Only profile one scenario (or comma-separated names)")
+  .option("--parallel", "Profile across parallel simulator pool")
+  .option("--headless", "Run simulator instances off-screen")
+  .option("-j, --concurrency <number>", "Number of concurrent simulator instances", (v) => parseInt(v, 10))
   .option("--developer-key <path>", "Developer key (or set CIQ_DEVELOPER_KEY)")
-  .action(async ({ config: configPath, device, scenario, developerKey: developerKeyOption }) => {
+  .action(async ({ config: configPath, device, scenario, parallel, headless, concurrency, developerKey: developerKeyOption }) => {
     const workspace = await loadWorkspace(configPath);
     const compilerPath = await discoverMonkeyc(workspace.config.compiler.path);
     const developerKey = resolveDeveloperKey(workspace.config.project.developerKey, developerKeyOption);
     if (!compilerPath) throw new Error("monkeyc was not found. Run doctor.");
     if (!developerKey) throw new Error("A developer key is required.");
+    const deviceFilter = device ? device.split(",").map((s: string) => s.trim()) : undefined;
+    const scenarioFilter = scenario ? scenario.split(",").map((s: string) => s.trim()) : undefined;
     const jobs = createMatrix(workspace.devices, workspace.scenarios).filter((job) =>
-      (!device || job.device.id === device) && (!scenario || job.scenario.name === scenario));
+      (!deviceFilter || deviceFilter.includes(job.device.id)) &&
+      (!scenarioFilter || scenarioFilter.includes(job.scenario.name)));
     if (!jobs.length) throw new Error("No matrix jobs matched the requested device and scenario.");
     const results = await executeRunMatrix({
       config: workspace.config,
       jobs,
       compilerPath,
       developerKey,
-      screenshot: false
+      screenshot: false,
+      parallel: Boolean(parallel),
+      headless: Boolean(headless),
+      concurrency
     });
     json(results.map(({ id, status, metrics, assertions }) => ({
       id,

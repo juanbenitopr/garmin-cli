@@ -32,7 +32,8 @@ describe("scenario instrumentation", () => {
     expect(first).toContain("new CiqForge.FixtureActivity");
     expect(first).toContain("new CiqForge.FixtureDisplayMode(true)");
     expect(first).toContain('new CiqForge.Diagnostics("venu3__training", true)');
-    expect(first).toContain("private var _context = null");
+    expect(first).toContain("var _context = null");
+    expect(first).not.toContain("private var _context");
     expect(first).toContain("if (_context == null)");
     expect(first).toContain("return _context");
   });

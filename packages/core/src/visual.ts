@@ -93,14 +93,23 @@ export async function normalizeScreenshot(input: {
 }): Promise<void> {
   const source = PNG.sync.read(await readFile(input.sourcePath));
   const size = Math.min(source.width, source.height);
-  const crop = input.crop ?? {
+  let crop = input.crop ?? {
     x: Math.floor((source.width - size) / 2),
     y: Math.floor((source.height - size) / 2),
     width: size,
     height: size
   };
+
   if (crop.x + crop.width > source.width || crop.y + crop.height > source.height) {
-    throw new Error("Screenshot crop exceeds captured window bounds.");
+    const scaleX = source.width / Math.max(1, crop.x + crop.width);
+    const scaleY = source.height / Math.max(1, crop.y + crop.height);
+    const scale = Math.min(scaleX, scaleY, 1);
+    crop = {
+      x: Math.max(0, Math.min(source.width - 1, Math.floor(crop.x * scale))),
+      y: Math.max(0, Math.min(source.height - 1, Math.floor(crop.y * scale))),
+      width: Math.max(1, Math.min(source.width, Math.floor(crop.width * scale))),
+      height: Math.max(1, Math.min(source.height, Math.floor(crop.height * scale)))
+    };
   }
   const output = new PNG({ width: input.width, height: input.height });
   const centerX = (input.width - 1) / 2;

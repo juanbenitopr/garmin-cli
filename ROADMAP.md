@@ -23,6 +23,10 @@
 - HTML matrix report.
 - Windows descendant-process termination on timeout.
 - Deterministic simulator window restoration, placement, sizing and foreground activation before capture.
+- Parallel Store Packaging (`ciq-forge package --parallel`) via multi-worker compilation and `IqPackagerBridge` (ADR 0004).
+- Multi-simulator concurrent matrix transport (`ciq-forge run --parallel --headless`) with dynamic `SHELL_SERVER_PORT`, single-instance mutex clearing, and monotonic port assignment.
+- Event-driven headless screenshot capture triggered on `render.complete` event stream with DWM GDI composition buffer.
+- Auto-terminating Java socket bridge (`PortMonkeyDo.java`) and unreferenced child processes for zero-leak lifecycle management.
 
 ## Next: harden real-project execution
 
@@ -37,4 +41,5 @@
 - Compile and runtime budgets.
 - Calibrated physical-device battery benchmarks (relative memory and simulator energy metrics are available).
 - Device capability catalog.
-- Connect IQ Store export orchestration.
+- Connect IQ Store release and metadata sync.
+

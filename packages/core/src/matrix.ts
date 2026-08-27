@@ -1,3 +1,4 @@
+import os from "node:os";
 import type { DeviceDefinition, MatrixJob, ScenarioDefinition } from "./types.js";
 
 export function createMatrix(
@@ -35,4 +36,12 @@ export async function mapConcurrent<T, R>(
 
   await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, worker));
   return results;
+}
+
+export function resolveDefaultConcurrency(custom?: number): number {
+  if (typeof custom === "number" && custom > 0) {
+    return Math.floor(custom);
+  }
+  const cpus = typeof os.cpus === "function" ? (os.cpus()?.length ?? 4) : 4;
+  return Math.max(1, cpus - 4);
 }

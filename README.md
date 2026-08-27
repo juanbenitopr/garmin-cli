@@ -20,6 +20,9 @@ It does **not** emulate Monkey C or replace Garmin's simulator. CIQ Forge orches
 - Strict validation for Forge, device, and scenario YAML.
 - Stable `device × scenario` execution matrices.
 - Garmin SDK discovery and official `monkeyc` compilation.
+- **Parallel Store Packaging (`ciq-forge package`)**: Compiles target devices concurrently across CPU workers and binds them into signed `.iq` store archives via Java bridge (`IqPackagerBridge`).
+- **Concurrent Headless Multi-Simulator Matrix (`ciq-forge run --parallel --headless`)**: Runs multiple simulator instances simultaneously on dedicated TCP ports (`12340..12399`) with mutex unlocking.
+- **Event-Driven Screenshot Capture**: Triggers visual capture automatically on the first `render.complete` event from the watch face lifecycle, guaranteeing rendered dials without timing heuristics.
 - Fixture-backed time, system, activity, weather, settings, and low-power state.
 - Simulator lifecycle assertions and structured diagnostics.
 - Screenshot normalization, approved baselines, and pixel diffs.
@@ -115,7 +118,8 @@ The generator refuses to overwrite a non-empty destination.
 | `ciq-forge matrix` | Print the stable device/scenario job matrix. |
 | `ciq-forge doctor` | Check the Garmin SDK, simulator tools, and developer key. |
 | `ciq-forge build` | Compile one isolated PRG per selected device. |
-| `ciq-forge run` | Build and execute instrumented simulator jobs. |
+| `ciq-forge package` | Compile and package signed release `.iq` archives in parallel across all CPU cores. |
+| `ciq-forge run` | Build and execute instrumented simulator jobs (supports `--parallel`, `--headless`, `--screenshot`). |
 | `ciq-forge profile` | Collect memory, render-time, binary, and energy metrics. |
 | `ciq-forge screenshot` | Capture the visible Garmin Simulator window. |
 | `ciq-forge baseline approve` | Explicitly approve a captured visual baseline. |
@@ -145,12 +149,21 @@ SDK discovery order:
 ### Build and run
 
 ```powershell
-ciq-forge build --device venu3
-ciq-forge run --device venu3 --scenario normal
-ciq-forge run --device venu3 --scenario normal --screenshot
+ciq-forge run
+ciq-forge run --parallel -j 2 --headless --screenshot
+ciq-forge run -d venu3 -s normal,night --parallel --headless --screenshot
+ciq-forge package --parallel --developer-key "$env:CIQ_DEVELOPER_KEY"
 ```
 
 Build outputs and reports are written below `.ciq-forge/results/` by default.
+
+### Parallel Headless Execution and Event-Driven Screenshots
+
+CIQ Forge orchestrates multiple headless simulator instances concurrently:
+- **Event-Driven Capture**: The runner automatically listens to the Connect IQ stdout stream for the `render.complete` event from `ForgeBootstrap` and triggers screenshot capture only once the watchface has finished drawing its first frame.
+- **Headless Win32 Capture**: Simulator windows are positioned off-screen (`-32000, -32000`) preserving the DWM GDI surface, captured via `PrintWindow`, and cleanly normalized.
+- **Anti-Hang Lifecycle**: Dedicated Java bridge sockets auto-terminate upon completion, preventing lingering TCP handles or simulator process deadlocks.
+- **Parallel IQ Packaging**: `ciq-forge package --parallel` compiles all target device binaries concurrently and packs them into official signed `.iq` archives.
 
 ### Lifecycle and fixture injection
 
@@ -196,7 +209,7 @@ The reported `energy.relativeScore` is a regression proxy based on active render
 ### Visual baselines
 
 ```powershell
-ciq-forge run --device venu3 --scenario normal --screenshot
+ciq-forge run -d venu3 -s normal --parallel --headless --screenshot
 ciq-forge baseline approve --run venu3__normal
 ```
 

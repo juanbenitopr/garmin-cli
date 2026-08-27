@@ -5,4 +5,8 @@ coverage/
 *.prg
 *.barrel
 *.iq
+*.class
+scripts/com/
+scripts/tools/
+*.png
 

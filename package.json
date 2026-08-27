@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "barrels",
+    "scripts/*.ps1",
     "README.md"
   ],
   "engines": {
@@ -29,7 +30,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build:bridges": "node scripts/compile-bridges.js",
+    "build": "node scripts/compile-bridges.js && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
